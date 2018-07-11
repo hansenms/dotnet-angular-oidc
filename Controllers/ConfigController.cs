@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using dotnet_angular_oidc.Model;
+using System.Net.Http;
+using System.Net.Http.Headers;
+
+namespace dotnet_angular_oidc.Controllers
+{
+    [Route("api/[controller]")]
+    public class ConfigController : Controller
+    {
+        private async Task<OidcWellKnown> GetWellKnownAsync()
+        {
+            if (_wellKnown == null) {
+                var client = new HttpClient();
+                client.BaseAddress = new Uri(_configuration["issuerUrl"]);
+                client.DefaultRequestHeaders.Clear();  
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json")); 
+
+                HttpResponseMessage response = await client.GetAsync(".well-known/openid-configuration");
+                if (response.IsSuccessStatusCode)
+                {
+                    _wellKnown = await response.Content.ReadAsAsync<OidcWellKnown>();
+                }
+            }
+            return _wellKnown;
+        }
+
+        private async Task<JwtKs> GetJwtKs()
+        {
+            if (_jwtKs == null) { 
+                var client = new HttpClient();
+                var wellKnown = await GetWellKnownAsync();
+                client.BaseAddress = new Uri(wellKnown.jwks_uri);
+                client.DefaultRequestHeaders.Clear();  
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json")); 
+
+                HttpResponseMessage response = await client.GetAsync("");
+                if (response.IsSuccessStatusCode)
+                {
+                    _jwtKs = await response.Content.ReadAsAsync<JwtKs>();
+                }
+            }
+
+            return _jwtKs;
+        }
+
+
+        private IConfiguration _configuration;
+        private OidcWellKnown _wellKnown;
+        private JwtKs _jwtKs;
+
+        public ConfigController(IConfiguration config)
+        {
+            _configuration = config;
+        }
+
+        
+        [HttpGet(".well-known/openid-configuration")]
+        public async Task<ActionResult<OidcWellKnown>> WellKnownAsync()
+        {
+            string protocol = Request.IsHttps ? "https://" : "http://";
+            string jwks_uri = $"{protocol}{Request.Host.ToUriComponent()}/api/config/discovery/keys";
+            var wellKnown = await GetWellKnownAsync();
+            wellKnown.jwks_uri = jwks_uri;
+            return wellKnown;
+        }
+
+        [HttpGet("discovery/keys")]
+        public async Task<ActionResult<JwtKs>> KeysAsync()
+        {
+            return await GetJwtKs();
+        }
+    }
+}
