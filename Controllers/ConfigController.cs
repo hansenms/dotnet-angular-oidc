@@ -91,15 +91,26 @@ namespace dotnet_angular_oidc.Controllers
             config.redirect_url = $"{protocol}{Request.Host.ToUriComponent()}/";
             config.client_id = _configuration["oidc:client_id"];
             config.response_type = "id_token token";
-            config.scope = "openid https://graph.microsoft.com/User.Read";
+            if (!String.IsNullOrEmpty(_configuration["oidc:scope"])) 
+            {
+                config.scope = _configuration["oidc:scope"];
+            }
+            else
+            {
+                config.scope = "openid https://graph.microsoft.com/User.Read";
+            } 
             config.post_logout_redirect_uri = $"{protocol}{Request.Host.ToUriComponent()}/";
             config.post_login_route = "/home";
             config.forbidden_route = "/home";
             config.unauthorized_route = "/home";
+            config.auto_userinfo = false;
             config.log_console_warning_active = true;
             config.log_console_debug_active = _env.IsDevelopment();
             config.max_id_token_iat_offset_allowed_in_seconds = 1000;
-
+            if (!String.IsNullOrEmpty(_configuration["oidc:resource"])) 
+            {
+                config.additional_login_parameters["resource"] = _configuration["oidc:resource"];
+            }
             return config;
         }
     }

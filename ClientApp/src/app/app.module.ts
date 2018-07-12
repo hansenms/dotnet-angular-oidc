@@ -91,6 +91,7 @@ export class AppModule {
       openIDImplicitFlowConfiguration.forbidden_route = this.oidcConfigService.clientConfiguration.forbidden_route;
       // HTTP 401
       openIDImplicitFlowConfiguration.unauthorized_route = this.oidcConfigService.clientConfiguration.unauthorized_route;
+      openIDImplicitFlowConfiguration.auto_userinfo = this.oidcConfigService.clientConfiguration.auto_userinfo;
       openIDImplicitFlowConfiguration.log_console_warning_active = this.oidcConfigService.clientConfiguration.log_console_warning_active;
       openIDImplicitFlowConfiguration.log_console_debug_active = this.oidcConfigService.clientConfiguration.log_console_debug_active;
       // id_token C8: The iat Claim can be used to reject tokens that were issued too far away from the current time,
@@ -98,8 +99,9 @@ export class AppModule {
       openIDImplicitFlowConfiguration.max_id_token_iat_offset_allowed_in_seconds =
         this.oidcConfigService.clientConfiguration.max_id_token_iat_offset_allowed_in_seconds;
 
-
       this.oidcSecurityService.setupModule(openIDImplicitFlowConfiguration, authWellKnownEndpoints);
+
+      this.oidcSecurityService.setCustomRequestParameters( this.oidcConfigService.clientConfiguration.additional_login_parameters );
 
     });
 
