@@ -97,7 +97,7 @@ namespace dotnet_angular_oidc.Controllers
             }
             else
             {
-                config.scope = "openid https://graph.microsoft.com/User.Read";
+                config.scope = "openid profile email https://graph.microsoft.com/User.Read";
             } 
             config.post_logout_redirect_uri = $"{protocol}{Request.Host.ToUriComponent()}/";
             config.post_login_route = "/home";
