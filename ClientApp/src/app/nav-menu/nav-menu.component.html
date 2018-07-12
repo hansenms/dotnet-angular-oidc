@@ -27,6 +27,21 @@
                         <span class='glyphicon glyphicon-th-list'></span> Fetch data
                     </a>
                 </li>
+                <li class="nav-item" *ngIf="isAuthorized" [routerLinkActive]='["link-active"]'>
+                    <a [routerLink]="['/protected']">
+                        <span class='glyphicon glyphicon-lock'></span>Protected
+                    </a>
+                </li>
+                <li [routerLinkActive]='["link-active"]'>
+                    <a *ngIf="!isAuthorized" [routerLink]="['#']" (click)="login()">
+                        <span class='glyphicon glyphicon-log-in'></span>Login
+                    </a>
+                </li>
+                <li [routerLinkActive]='["link-active"]'>
+                    <a *ngIf="isAuthorized"  [routerLink]="['#']" (click)="logout()">
+                        <span class='glyphicon glyphicon-log-out'></span>Logout
+                    </a>
+                </li>                  
             </ul>
         </div>
     </div>
